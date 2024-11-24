@@ -63,4 +63,24 @@ func main() {
 		}
 	}
 	log.Println("🥳 all words are in mapping table")
+
+	file, err = os.Create("../seed-number-conversion.csv")
+	if err != nil {
+		panic(err)
+	}
+	defer file.Close()
+
+	type revertedRecord struct {
+		Word   string `csv:"WORD"`
+		Number string `csv:"NUMBER"`
+	}
+	var revertedRecords = make([]*revertedRecord, 0)
+	for _, record := range records {
+		revertedRecords = append(revertedRecords, &revertedRecord{Word: record.Word, Number: record.Number})
+	}
+
+	err = gocsv.MarshalFile(&revertedRecords, file)
+	if err != nil {
+		panic(err)
+	}
 }
