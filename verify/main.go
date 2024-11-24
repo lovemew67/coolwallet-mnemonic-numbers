@@ -64,7 +64,7 @@ func main() {
 	}
 	log.Println("🥳 all words are in mapping table")
 
-	file, err = os.Create("../seed-number-conversion.csv")
+	file, err = os.Create("../seed-number-conversion-full.csv")
 	if err != nil {
 		panic(err)
 	}
@@ -74,12 +74,35 @@ func main() {
 		Word   string `csv:"WORD"`
 		Number string `csv:"NUMBER"`
 	}
-	var revertedRecords = make([]*revertedRecord, 0)
+
+	var fullRevertedRecords = make([]*revertedRecord, 0)
 	for _, record := range records {
-		revertedRecords = append(revertedRecords, &revertedRecord{Word: record.Word, Number: record.Number})
+		fullRevertedRecords = append(fullRevertedRecords, &revertedRecord{Word: record.Word, Number: record.Number})
+	}
+	err = gocsv.MarshalFile(&fullRevertedRecords, file)
+	if err != nil {
+		panic(err)
 	}
 
-	err = gocsv.MarshalFile(&revertedRecords, file)
+	file, err = os.Create("../seed-number-conversion-trimmed.csv")
+	if err != nil {
+		panic(err)
+	}
+	defer file.Close()
+
+	var trimmedRevertedRecords = make([]*revertedRecord, 0)
+	for _, record := range records {
+		word := record.Word
+		if len(word) > 3 {
+			word = word[:4]
+		}
+
+		trimmedRevertedRecords = append(trimmedRevertedRecords, &revertedRecord{
+			Word:   word,
+			Number: record.Number,
+		})
+	}
+	err = gocsv.MarshalFile(&trimmedRevertedRecords, file)
 	if err != nil {
 		panic(err)
 	}
